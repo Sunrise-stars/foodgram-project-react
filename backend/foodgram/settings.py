@@ -8,7 +8,8 @@ BASE_DIR = os.path.dirname(
 
 SECRET_KEY = (
     'SECRET_KEY',
-    '+bjgd4R9HpO"v4*a5}n=x>9s/IH9y9$Y}tRP,XuTj}yGr}KF"P')
+    '+bjgd4R9HpO"v4*a5}n=x>9s/IH9y9$Y}tRP,XuTj}yGr}KF"P'
+)
 
 DEBUG = os.getenv('DEBUG', default='True') == 'True'
 
