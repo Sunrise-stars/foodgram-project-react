@@ -5,19 +5,19 @@ from users.models import User
 from recipes.models import Ingredient, Recipe
 
 
-class TagsMultipleChoiceField(
-        filters.fields.MultipleChoiceField):
+class TagsMultipleChoiceField(filters.fields.MultipleChoiceField):
     def validate(self, value):
         if self.required and not value:
             raise ValidationError(
-                self.error_messages['required'],
-                code='required')
+                self.error_messages['required'], code='required'
+            )
         for val in value:
             if val in self.choices and not self.valid_value(val):
                 raise ValidationError(
                     self.error_messages['invalid_choice'],
                     code='invalid_choice',
-                    params={'value': val},)
+                    params={'value': val},
+                )
 
 
 class TagsFilter(filters.AllValuesMultipleFilter):
@@ -33,17 +33,16 @@ class IngredientFilter(filters.FilterSet):
 
 
 class RecipeFilter(filters.FilterSet):
-    author = filters.ModelChoiceFilter(
-        queryset=User.objects.all())
+    author = filters.ModelChoiceFilter(queryset=User.objects.all())
     is_in_shopping_cart = filters.BooleanFilter(
-        widget=filters.widgets.BooleanWidget(),
-        label='In cart')
+        widget=filters.widgets.BooleanWidget(), label='In cart'
+    )
     is_favorited = filters.BooleanFilter(
-        widget=filters.widgets.BooleanWidget(),
-        label='In favorite')
+        widget=filters.widgets.BooleanWidget(), label='In favorite'
+    )
     tags = filters.AllValuesMultipleFilter(
-        field_name='tags__slug',
-        label='Slug')
+        field_name='tags__slug', label='Slug'
+    )
 
     class Meta:
         model = Recipe

@@ -3,20 +3,21 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_DIR = os.path.dirname(
-    os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = (
     'SECRET_KEY',
-    '+bjgd4R9HpO"v4*a5}n=x>9s/IH9y9$Y}tRP,XuTj}yGr}KF"P'
+    '+bjgd4R9HpO"v4*a5}n=x>9s/IH9y9$Y}tRP,XuTj}yGr}KF"P',
 )
 
 DEBUG = os.getenv('DEBUG', default='True') == 'True'
 
-CSRF_TRUSTED_ORIGINS=os.environ.get(
-    'CSRF_TRUSTED_ORIGINS', default='localhost').split(', ')
-ALLOWED_HOSTS = os.environ.get(
-    'ALLOWED_HOSTS', default='localhost').split(', ')
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    'CSRF_TRUSTED_ORIGINS', default = 'localhost'
+).split(', ')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', default='localhost').split(
+    ', '
+)
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -69,23 +70,15 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': os.getenv(
-            'DB_ENGINE', default='django.db.backends.postgresql'),
-        'NAME': os.getenv(
-            'POSTGRES_DB',
-            default='postgres'),
-        'USER': os.getenv(
-            'POSTGRES_USER',
-            default='postgres'),
-        'PASSWORD': os.getenv(
-            'POSTGRES_PASSWORD',
-            default='postgres'),
-        'HOST': os.getenv(
-            'DB_HOST',
-            default='db'),
-        'PORT': os.getenv(
-            'DB_PORT',
-            default='5432'),
-    }}
+            'DB_ENGINE', default='django.db.backends.postgresql'
+        ),
+        'NAME': os.getenv('POSTGRES_DB', default='postgres'),
+        'USER': os.getenv('POSTGRES_USER', default='postgres'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
+        'HOST': os.getenv('DB_HOST', default='db'),
+        'PORT': os.getenv('DB_PORT', default='5432'),
+    }
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
