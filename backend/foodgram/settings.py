@@ -13,8 +13,9 @@ SECRET_KEY = (
 DEBUG = os.getenv('DEBUG', default='True') == 'True'
 
 CSRF_TRUSTED_ORIGINS = os.environ.get(
-    'CSRF_TRUSTED_ORIGINS', default = 'localhost'
+    'CSRF_TRUSTED_ORIGINS', default='localhost'
 ).split(', ')
+
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', default='localhost').split(
     ', '
 )
