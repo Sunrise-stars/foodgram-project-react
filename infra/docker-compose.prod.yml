@@ -1,11 +1,4 @@
 version: '3.3'
-
-volumes:
-  postgres_data:
-  static_value:
-  media_value:
-  data_value:
-
 services:
   db:
     image: postgres:14
@@ -16,10 +9,10 @@ services:
       - ./.env
 
   backend:
-    build: ../backend/
+    image: rastiwka/foodgram_backend:latest
     restart: always
     volumes:
-      - ../backend/:/app
+      - data_value:/app/data/
       - static_value:/app/static/
       - media_value:/app/media/
     depends_on:
@@ -47,3 +40,9 @@ services:
       - media_value:/var/html/media/
     depends_on:
       - frontend
+
+volumes:
+  postgres_data:
+  static_value:
+  media_value:
+  data_value:
