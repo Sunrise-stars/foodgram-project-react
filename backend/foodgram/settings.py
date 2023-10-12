@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,9 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-(9kw$n$7l!jb9y&5ay3=op(@v3ja^%2b#&sk@0+@d&z29c7wj$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', default='True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get(
+    'ALLOWED_HOSTS', default='localhost').split(', ')
 
 
 # Application definition
@@ -75,10 +76,24 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+        'ENGINE': os.getenv(
+            'DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': os.getenv(
+            'POSTGRES_DB',
+            default='postgres'),
+        'USER': os.getenv(
+            'POSTGRES_USER',
+            default='postgres'),
+        'PASSWORD': os.getenv(
+            'POSTGRES_PASSWORD',
+            default='postgres'),
+        'HOST': os.getenv(
+            'DB_HOST',
+            default='db'),
+        'PORT': os.getenv(
+            'DB_PORT',
+            default='5432'),
+    }}
 
 
 # Password validation
