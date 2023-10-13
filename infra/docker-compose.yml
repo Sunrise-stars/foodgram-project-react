@@ -17,7 +17,7 @@ services:
 
   backend:
     build: ../backend/
-    restart: always
+#    restart: always
     volumes:
       - ../backend/:/app
       - static_value:/app/static/

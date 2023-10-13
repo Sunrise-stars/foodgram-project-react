@@ -29,6 +29,7 @@ ALLOWED_HOSTS = os.environ.get(
     'ALLOWED_HOSTS', default='localhost').split(', ')
 
 
+AUTH_USER_MODEL = 'users.User'
 # Application definition
 
 INSTALLED_APPS = [
@@ -38,6 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users.apps.UsersConfig',
+    'recipes.apps.RecipeConfig',
+    'subscriptions.apps.SubscriptionsConfig',
+    'favorites.apps.FavoritesConfig'
 ]
 
 MIDDLEWARE = [
