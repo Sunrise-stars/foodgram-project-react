@@ -171,7 +171,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return not (request is None or request.user.is_anonymous) and Cart.objects.filter(user=request.user,
                                                                                           recipe_id=obj).exists()
 
-class FavoriteSerializer(serializers.ModelSerializer):
+class FavoriteAndCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ['id', 'name','image', 'cooking_time']
