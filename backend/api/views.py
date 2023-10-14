@@ -6,7 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from favorites.models import Favorite
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import status, viewsets
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import api_view
 from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -16,9 +16,14 @@ from users.models import User
 from .filters import IngredientFilter, RecipeFilter
 from .pagination import Pagination
 from .permissions import ReadOnlyAndEditAuthor
-from .serializers import (EditRecipeSerializer, FavoriteAndCartSerializer,
-                          IngredientSerializer, RecipeSerializer,
-                          SubscriptionSerializer, TagSerializer)
+from .serializers import (
+    EditRecipeSerializer,
+    FavoriteAndCartSerializer,
+    IngredientSerializer,
+    RecipeSerializer,
+    SubscriptionSerializer,
+    TagSerializer,
+)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
