@@ -13,11 +13,13 @@ from .filters import RecipeFilter, IngredientFilter
 from .pagination import Pagination
 from .permissions import ReadOnlyAndEditAuthor
 from .serializers import (TagSerializer, IngredientSerializer, RecipeSerializer, EditRecipeSerializer,
-                          FavoriteAndCartSerializer)
+                          FavoriteAndCartSerializer, SubscriptionSerializer)
 from recipes.models import (Tag, Ingredient, Recipe)
 from favorites.models import Favorite
 from carts.models import Cart
 from recipes.models import RecipeIngredient
+from users.models import User
+from subscriptions.models import Subscription
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -34,6 +36,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = IngredientFilter
+
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -114,6 +117,53 @@ class CartRecipeView(RetrieveDestroyAPIView, ListCreateAPIView):
             Cart.objects.filter(user=user, recipe=instance).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response({'detail': 'Рецепт еще не был добавлен в корзину.'},status=status.HTTP_400_BAD_REQUEST)
+
+
+class SubscriptionsView(RetrieveDestroyAPIView, ListCreateAPIView):
+    permission_classes = [IsAuthenticated, ]
+    pagination_class = Pagination
+    def get_serializer_class(self):
+        return SubscriptionSerializer
+    def get(self, request):
+        user = request.user
+        queryset = Subscription.objects.filter(subscriber=user)
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True,context={'request': request})
+        return self.get_paginated_response(serializer.data)
+
+
+    def create(self, request, *args, **kwargs):
+        author_id = kwargs.get('id')
+        author = get_object_or_404(User, id=author_id)
+        user = request.user
+
+        if user == author:
+            return Response(
+                {'detail': 'Нельзя подписаться на самого себя.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not Subscription.objects.filter(
+           subscriber=user, author=author).exists():
+            subscription = Subscription.objects.create(subscriber=user, author=author)
+            serializer = self.get_serializer(subscription)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(
+            {'detail': 'Подписка уже существует.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    def delete(self, request, *args, **kwargs):
+        author_id = kwargs.get('id')
+        author = get_object_or_404(User, id=author_id)
+        user = request.user
+
+        if Subscription.objects.filter(
+           subscriber=user, author=author).exists():
+            Subscription.objects.filter(subscriber=user, author=author).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'detail': 'Подписка уже была удалена.'},status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def download_shopping_cart(request):
