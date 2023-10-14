@@ -85,4 +85,4 @@ class RecipeIngredient(models.Model):
         return (
             f"{self.ingredient.name} "
             f"({self.amount} {self.ingredient.measurement_unit})"
-            )
+        )
