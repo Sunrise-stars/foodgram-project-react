@@ -82,4 +82,5 @@ class RecipeIngredient(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.ingredient.name} ({self.amount} {self.ingredient.measurement_unit})"
+        return f"{self.ingredient.name} ({self.amount} 
+        {self.ingredient.measurement_unit})"
