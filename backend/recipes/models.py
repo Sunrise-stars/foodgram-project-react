@@ -9,6 +9,11 @@ class Tag(models.Model):
     color = models.CharField(max_length=7, verbose_name='Цвет')
     slug = models.SlugField(unique=True, max_length=200, verbose_name='Slug')
 
+    class Meta:
+        verbose_name = 'Тэг'
+        verbose_name_plural = 'Тэги'
+        ordering = ['-id']
+
     def __str__(self):
         return self.name
 
@@ -16,6 +21,11 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(max_length=200, verbose_name='Наименование')
     measurement_unit = models.CharField(max_length=200, verbose_name='Единица измерения')
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
         return f"{self.name} ({self.measurement_unit})"
@@ -29,6 +39,11 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(Tag, related_name='recipes', verbose_name='Теги')
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient', verbose_name='Ингредиенты')
 
+    class Meta:
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+        ordering = ('-id', )
+
     def __str__(self):
         return self.name
 
@@ -36,6 +51,15 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField()
+
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+        ordering = ['-id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'recipe_ingredients'],
+                name='unique ingredient')]
 
     def __str__(self):
         return f"{self.ingredient.name} ({self.amount} {self.ingredient.measurement_unit})"
