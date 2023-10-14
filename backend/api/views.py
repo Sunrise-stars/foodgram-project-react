@@ -169,7 +169,7 @@ class SubscriptionsView(RetrieveDestroyAPIView, ListCreateAPIView):
 def download_shopping_cart(request):
     ingredient_list = "Cписок покупок:"
     ingredients = RecipeIngredient.objects.filter(
-        recipe__cart__user=request.user
+        recipe__cart_by__user=request.user
     ).values(
         'ingredient__name', 'ingredient__measurement_unit'
     ).annotate(amount=Sum('amount'))
@@ -181,6 +181,6 @@ def download_shopping_cart(request):
         if num < ingredients.count() - 1:
             ingredient_list += ', '
     file = 'shopping_list'
-    response = HttpResponse(ingredient_list, 'Content-Type: application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{file}.pdf"'
+    response = HttpResponse(ingredient_list, 'Content-Type: application/txt')
+    response['Content-Disposition'] = f'attachment; filename="{file}.txt"'
     return response
