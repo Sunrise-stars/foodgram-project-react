@@ -6,6 +6,7 @@ from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import serializers
 from subscriptions.models import Subscription
 from users.models import User
+from django.db import transaction 
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
