@@ -25,7 +25,6 @@ from .serializers import (
     TagSerializer,
 )
 
-
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
     pagination_class = None

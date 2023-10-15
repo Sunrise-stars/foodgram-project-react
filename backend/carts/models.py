@@ -4,7 +4,6 @@ from recipes.models import Recipe
 
 User = get_user_model()
 
-
 class Cart(models.Model):
     user = models.ForeignKey(
         User,

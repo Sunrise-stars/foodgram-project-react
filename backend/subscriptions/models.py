@@ -3,7 +3,6 @@ from django.db import models
 
 User = get_user_model()
 
-
 class Subscription(models.Model):
     subscriber = models.ForeignKey(
         User,
