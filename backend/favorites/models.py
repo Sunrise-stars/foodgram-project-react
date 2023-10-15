@@ -1,5 +1,8 @@
+# Импорт из стандартной библиотеки Python
 from django.contrib.auth import get_user_model
 from django.db import models
+
+# Импорт, зависящий от локального приложения
 from recipes.models import Recipe
 
 
