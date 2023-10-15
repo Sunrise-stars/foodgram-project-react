@@ -115,47 +115,36 @@ class EditRecipeSerializer(serializers.ModelSerializer):
         tags_data = validated_data.pop('tags')
         author = self.context['request'].user
 
-        recipe = Recipe.objects.create(author=author, **validated_data)
-
-        for ingredient_data in ingredients_data:
-            RecipeIngredient.objects.create(
-                ingredient=Ingredient.objects.get(id=ingredient_data['id']),
-                recipe=recipe,
-                amount=ingredient_data['amount'],
-            )
-
-        recipe.tags.set(tags_data)
+        with transaction.atomic():
+            recipe = Recipe.objects.create(author=author, **validated_data)
+            self._create_or_update_ingredients(recipe, ingredients_data)
+            recipe.tags.set(tags_data)
 
         return recipe
 
     def update(self, instance, validated_data):
         RecipeIngredient.objects.filter(recipe=instance).delete()
+        ingredients_data = validated_data.pop('ingredients')
 
-        for ingredient_data in validated_data.pop('ingredients'):
-            RecipeIngredient.objects.create(
-                ingredient=Ingredient.objects.get(id=ingredient_data['id']),
-                recipe=instance,
-                amount=ingredient_data['amount'],
-            )
+        # Use super to update standard fields
+        super().update(instance, validated_data)
 
-        if 'tags' in validated_data:
-            instance.tags.set(validated_data.pop('tags'))
-
-        instance.name = validated_data.pop('name')
-        instance.text = validated_data.pop('text')
-        instance.cooking_time = validated_data.pop('cooking_time')
-
-        if 'image' in validated_data:
-            instance.image = validated_data.pop('image')
-
-        instance.save()
+        # Create or update ingredients
+        self._create_or_update_ingredients(instance, ingredients_data)
 
         return instance
 
-    def to_representation(self, instance):
-        return RecipeSerializer(
-            instance, context={'request': self.context.get('request')}
-        ).data
+    def _create_or_update_ingredients(self, recipe, ingredients_data):
+        ingredients_to_create = [
+            RecipeIngredient(
+                ingredient_id=ingredient['id'],
+                recipe=recipe,
+                amount=ingredient['amount'],
+            )
+            for ingredient in ingredients_data
+        ]
+
+        RecipeIngredient.objects.bulk_create(ingredients_to_create)
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
@@ -173,7 +162,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer()
     tags = TagSerializer(many=True)
-    ingredients = serializers.SerializerMethodField()
+    ingredients = EditRecipeIngredientSerializer(many=True)
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField(
         method_name='get_is_favorited'
@@ -186,16 +175,12 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
-    def get_ingredients(self, obj):
-        ingredients = RecipeIngredient.objects.filter(recipe=obj)
-        return RecipeIngredientSerializer(ingredients, many=True).data
-
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         return (
             not (request is None or request.user.is_anonymous)
             and Favorite.objects.filter(
-                user=request.user, recipe_id=obj
+                user=request.user, recipe_id=obj.id
             ).exists()
         )
 
@@ -203,7 +188,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         return (
             not (request is None or request.user.is_anonymous)
-            and Cart.objects.filter(user=request.user, recipe_id=obj).exists()
+            and Cart.objects.filter(
+                user=request.user, recipe_id=obj.id
+            ).exists()
         )
 
 
@@ -247,6 +234,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return FavoriteAndCartSerializer(recipes, many=True).data
 
     def get_is_subscribed(self, obj):
+        return self._check_subscription(obj)
+
+    def _check_subscription(self, obj):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False

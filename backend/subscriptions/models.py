@@ -20,3 +20,6 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f'{self.subscriber} подписан на {self.author}'
+
+    class Meta:
+        unique_together = ['subscriber', 'author']

@@ -27,36 +27,26 @@ from .serializers import (
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [
-        AllowAny,
-    ]
+    permission_classes = [AllowAny]
     pagination_class = None
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [
-        AllowAny,
-    ]
+    permission_classes = [AllowAny]
     pagination_class = None
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
-    filter_backends = [
-        DjangoFilterBackend,
-    ]
+    filter_backends = [DjangoFilterBackend]
     filterset_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    permission_classes = [
-        ReadOnlyAndEditAuthor,
-    ]
+    permission_classes = [ReadOnlyAndEditAuthor]
     pagination_class = Pagination
     queryset = Recipe.objects.all()
-    filter_backends = [
-        DjangoFilterBackend,
-    ]
+    filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
@@ -65,13 +55,31 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return EditRecipeSerializer
 
 
-class FavoriteRecipeView(RetrieveDestroyAPIView, ListCreateAPIView):
-    permission_classes = [
-        IsAuthenticated,
-    ]
+@api_view(['GET'])
+def download_shopping_cart(request):
+    ingredient_list = "Список покупок:"
+    ingredients = (
+        RecipeIngredient.objects.filter(recipe__cart_by__user=request.user)
+        .values('ingredient__name', 'ingredient__measurement_unit')
+        .annotate(total_amount=Sum('amount'))
+    )
+    for num, i in enumerate(ingredients):
+        ingredient_list += (
+            f"\n{i['ingredient__name']} - "
+            f"{i['total_amount']} {i['ingredient__measurement_unit']}"
+        )
+        if num < len(ingredients) - 1:
+            ingredient_list += ', '
 
-    def get_serializer_class(self):
-        return FavoriteAndCartSerializer
+    file = 'shopping_list'
+    response = HttpResponse(ingredient_list, content_type='application/txt')
+    response['Content-Disposition'] = f'attachment; filename="{file}.txt"'
+    return response
+
+
+class FavoriteRecipeView(RetrieveDestroyAPIView, ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FavoriteAndCartSerializer
 
     def create(self, request, *args, **kwargs):
         recipe_id = kwargs.get('id')
@@ -103,12 +111,8 @@ class FavoriteRecipeView(RetrieveDestroyAPIView, ListCreateAPIView):
 
 
 class CartRecipeView(RetrieveDestroyAPIView, ListCreateAPIView):
-    permission_classes = [
-        IsAuthenticated,
-    ]
-
-    def get_serializer_class(self):
-        return FavoriteAndCartSerializer
+    permission_classes = [IsAuthenticated]
+    serializer_class = FavoriteAndCartSerializer
 
     def create(self, request, *args, **kwargs):
         recipe_id = kwargs.get('id')
@@ -140,13 +144,9 @@ class CartRecipeView(RetrieveDestroyAPIView, ListCreateAPIView):
 
 
 class SubscriptionsView(RetrieveDestroyAPIView, ListCreateAPIView):
-    permission_classes = [
-        IsAuthenticated,
-    ]
+    permission_classes = [IsAuthenticated]
     pagination_class = Pagination
-
-    def get_serializer_class(self):
-        return SubscriptionSerializer
+    serializer_class = SubscriptionSerializer
 
     def get(self, request):
         user = request.user
@@ -198,24 +198,3 @@ class SubscriptionsView(RetrieveDestroyAPIView, ListCreateAPIView):
             {'detail': 'Подписка уже была удалена.'},
             status=status.HTTP_400_BAD_REQUEST,
         )
-
-
-@api_view(['GET'])
-def download_shopping_cart(request):
-    ingredient_list = "Cписок покупок:"
-    ingredients = (
-        RecipeIngredient.objects.filter(recipe__cart_by__user=request.user)
-        .values('ingredient__name', 'ingredient__measurement_unit')
-        .annotate(amount=Sum('amount'))
-    )
-    for num, i in enumerate(ingredients):
-        ingredient_list += (
-            f"\n{i['ingredient__name']} - "
-            f"{i['amount']} {i['ingredient__measurement_unit']}"
-        )
-        if num < ingredients.count() - 1:
-            ingredient_list += ', '
-    file = 'shopping_list'
-    response = HttpResponse(ingredient_list, 'Content-Type: application/txt')
-    response['Content-Disposition'] = f'attachment; filename="{file}.txt"'
-    return response

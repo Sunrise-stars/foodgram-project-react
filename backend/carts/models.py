@@ -19,5 +19,12 @@ class Cart(models.Model):
         verbose_name='Рецепт',
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'], name='unique_cart'
+            )
+        ]
+
     def __str__(self):
-        return f'{self.user} добавил(а) {self.recipe} в карзину'
+        return f'{self.user} добавил(а) {self.recipe} в корзину'
