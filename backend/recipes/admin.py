@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 
 from .models import Ingredient, Recipe, RecipeIngredient, Tag
 
+
 User = get_user_model()
 
 class RecipeIngredientAdmin(admin.StackedInline):

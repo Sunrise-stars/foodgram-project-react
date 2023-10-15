@@ -3,6 +3,7 @@ import csv
 from django.core.management.base import BaseCommand
 from recipes.models import Tag
 
+
 class Command(BaseCommand):
     help = 'Загрузка тегов из файла'
 

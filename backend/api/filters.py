@@ -1,6 +1,7 @@
 from django_filters import rest_framework as filter
 from recipes.models import Ingredient, Recipe, Tag
 
+
 class IngredientFilter(filter.FilterSet):
     name = filter.CharFilter(field_name='name', lookup_expr='icontains')
 

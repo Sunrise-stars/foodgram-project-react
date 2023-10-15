@@ -13,6 +13,7 @@ from users.models import User
 # Импорты из стандартной библиотеки Python
 from django.db import transaction
 
+
 class CustomUserCreateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
         model = User
