@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 
-# Связанные сторонние импорты 
+# Связанные сторонние импорты
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view

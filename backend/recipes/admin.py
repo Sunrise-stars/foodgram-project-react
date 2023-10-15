@@ -6,6 +6,7 @@ from .models import Ingredient, Recipe, RecipeIngredient, Tag
 
 User = get_user_model()
 
+
 class RecipeIngredientAdmin(admin.StackedInline):
     model = RecipeIngredient
     autocomplete_fields = ('ingredient',)

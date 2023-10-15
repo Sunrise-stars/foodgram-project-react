@@ -1,9 +1,9 @@
-# Импорты из сторонних библиотек 
+# Импорты из сторонних библиотек
 from djoser.serializers import UserCreateSerializer
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
 
-# Импорты из ваших собственных модулей 
+# Импорты из ваших собственных модулей
 from carts.models import Cart
 from favorites.models import Favorite
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
