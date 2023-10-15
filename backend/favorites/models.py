@@ -8,6 +8,7 @@ from recipes.models import Recipe
 
 User = get_user_model()
 
+
 class Favorite(models.Model):
     user = models.ForeignKey(
         User,
