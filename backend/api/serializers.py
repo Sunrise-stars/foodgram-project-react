@@ -2,8 +2,8 @@ from djoser.serializers import UserCreateSerializer
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
 from django.db import transaction
-from carts.models import Cart
 
+from carts.models import Cart
 from favorites.models import Favorite
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from subscriptions.models import Subscription
@@ -125,7 +125,7 @@ class EditRecipeSerializer(serializers.ModelSerializer):
 
         with transaction.atomic():
             recipe = Recipe.objects.create(author=author, **validated_data)
-            self._create_to_ingredients(recipe, ingredients_data)
+            self._create_ingredients(recipe, ingredients_data)
             recipe.tags.set(tags_data)
 
         return recipe
@@ -135,11 +135,11 @@ class EditRecipeSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             RecipeIngredient.objects.filter(recipe=instance).delete()
             super().update(instance, validated_data)
-            self._create_to_ingredients(instance, ingredients_data)
+            self._create_ingredients(instance, ingredients_data)
 
         return instance
 
-    def _create_to_ingredients(self, recipe, ingredients_data):
+    def _create_ingredients(self, recipe, ingredients_data):
         ingredients_to_create = [
             RecipeIngredient(
                 ingredient_id=ingredient['id'],
