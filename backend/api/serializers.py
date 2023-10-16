@@ -1,17 +1,23 @@
-# Импорты из сторонних библиотек
 from djoser.serializers import UserCreateSerializer
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
-
-# Импорты из ваших собственных модулей
+from django.db import transaction
 from carts.models import Cart
+
 from favorites.models import Favorite
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from subscriptions.models import Subscription
 from users.models import User
 
-# Импорты из стандартной библиотеки Python
-from django.db import transaction
+
+class SubscriptionUtils:
+    @staticmethod
+    def check_subscription(user, author):
+        if user.is_anonymous:
+            return False
+        return Subscription.objects.filter(
+            subscriber=user, author=author
+        ).exists()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -35,12 +41,8 @@ class CustomUserSerializer(UserCreateSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        return Subscription.objects.filter(
-            subscriber=request.user, author=obj
-        ).exists()
+        user = self.context.get('request').user
+        return SubscriptionUtils.check_subscription(user, obj)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -123,24 +125,21 @@ class EditRecipeSerializer(serializers.ModelSerializer):
 
         with transaction.atomic():
             recipe = Recipe.objects.create(author=author, **validated_data)
-            self._create_or_update_ingredients(recipe, ingredients_data)
+            self._create_to_ingredients(recipe, ingredients_data)
             recipe.tags.set(tags_data)
 
         return recipe
 
     def update(self, instance, validated_data):
-        RecipeIngredient.objects.filter(recipe=instance).delete()
         ingredients_data = validated_data.pop('ingredients')
-
-        # Use super to update standard fields
-        super().update(instance, validated_data)
-
-        # Create or update ingredients
-        self._create_or_update_ingredients(instance, ingredients_data)
+        with transaction.atomic():
+            RecipeIngredient.objects.filter(recipe=instance).delete()
+            super().update(instance, validated_data)
+            self._create_to_ingredients(instance, ingredients_data)
 
         return instance
 
-    def _create_or_update_ingredients(self, recipe, ingredients_data):
+    def _create_to_ingredients(self, recipe, ingredients_data):
         ingredients_to_create = [
             RecipeIngredient(
                 ingredient_id=ingredient['id'],
@@ -240,15 +239,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return FavoriteAndCartSerializer(recipes, many=True).data
 
     def get_is_subscribed(self, obj):
-        return self._check_subscription(obj)
-
-    def _check_subscription(self, obj):
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        return Subscription.objects.filter(
-            subscriber=request.user, author=obj.author
-        ).exists()
+        return SubscriptionUtils.check_subscription(
+            self.context.get('request').user, obj.author
+        )
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.author).count()

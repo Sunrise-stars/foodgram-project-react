@@ -1,9 +1,7 @@
-# Импорты из стандартной библиотеки Python
 from django.http import HttpResponse
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 
-# Связанные сторонние импорты
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
@@ -11,7 +9,6 @@ from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-# Импорты, зависящие от локального приложения / библиотеки
 from carts.models import Cart
 from favorites.models import Favorite
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
@@ -29,6 +26,52 @@ from .serializers import (
     SubscriptionSerializer,
     TagSerializer,
 )
+
+
+class AddRemoveFromListMixin:
+    def perform_action(
+        self,
+        request,
+        instance,
+        list_model,
+        list_name,
+        error_message,
+        *args,
+        **kwargs,
+    ):
+        user = request.user
+        recipe_id = kwargs.get('id')
+        instance = get_object_or_404(Recipe, id=recipe_id)
+
+        if not list_model.objects.filter(user=user, recipe=instance).exists():
+            item = list_model.objects.create(user=user, recipe=instance)
+            serializer = self.get_serializer(item.recipe)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(
+                {'detail': error_message},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    def create(self, request, *args, **kwargs):
+        return self.perform_action(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        recipe_id = kwargs.get('id')
+        instance = get_object_or_404(Recipe, id=recipe_id)
+
+        if self.list_model.objects.filter(user=user, recipe=instance).exists():
+            self.list_model.objects.filter(user=user, recipe=instance).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {
+                'detail': 'Рецепт еще не был добавлен в {}.'.format(
+                    self.list_name
+                )
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -82,70 +125,24 @@ def download_shopping_cart(request):
     return response
 
 
-class FavoriteRecipeView(RetrieveDestroyAPIView, ListCreateAPIView):
+class FavoriteRecipeView(
+    AddRemoveFromListMixin, RetrieveDestroyAPIView, ListCreateAPIView
+):
     permission_classes = [IsAuthenticated]
     serializer_class = FavoriteAndCartSerializer
-
-    def create(self, request, *args, **kwargs):
-        recipe_id = kwargs.get('id')
-        instance = get_object_or_404(Recipe, id=recipe_id)
-        user = request.user
-
-        if not Favorite.objects.filter(user=user, recipe=instance).exists():
-            favorite = Favorite.objects.create(user=user, recipe=instance)
-            serializer = self.get_serializer(favorite.recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(
-                {'detail': 'Рецепт уже добавлен в избранное.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-    def delete(self, request, *args, **kwargs):
-        recipe_id = kwargs.get('id')
-        instance = get_object_or_404(Recipe, id=recipe_id)
-        user = request.user
-
-        if Favorite.objects.filter(user=user, recipe=instance).exists():
-            Favorite.objects.filter(user=user, recipe=instance).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(
-            {'detail': 'Рецепт еще не был добавлен в избранное.'},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+    list_model = Favorite
+    list_name = 'избранное'
+    error_message = 'Рецепт уже добавлен в избранное.'
 
 
-class CartRecipeView(RetrieveDestroyAPIView, ListCreateAPIView):
+class CartRecipeView(
+    AddRemoveFromListMixin, RetrieveDestroyAPIView, ListCreateAPIView
+):
     permission_classes = [IsAuthenticated]
     serializer_class = FavoriteAndCartSerializer
-
-    def create(self, request, *args, **kwargs):
-        recipe_id = kwargs.get('id')
-        instance = get_object_or_404(Recipe, id=recipe_id)
-        user = request.user
-
-        if not Cart.objects.filter(user=user, recipe=instance).exists():
-            favorite = Cart.objects.create(user=user, recipe=instance)
-            serializer = self.get_serializer(favorite.recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(
-                {'detail': 'Рецепт уже добавлен в корзину.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-    def delete(self, request, *args, **kwargs):
-        recipe_id = kwargs.get('id')
-        instance = get_object_or_404(Recipe, id=recipe_id)
-        user = request.user
-
-        if Cart.objects.filter(user=user, recipe=instance).exists():
-            Cart.objects.filter(user=user, recipe=instance).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(
-            {'detail': 'Рецепт еще не был добавлен в корзину.'},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+    list_model = Cart
+    list_name = 'корзину'
+    error_message = 'Рецепт уже добавлен в корзину.'
 
 
 class SubscriptionsView(RetrieveDestroyAPIView, ListCreateAPIView):

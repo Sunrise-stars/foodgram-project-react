@@ -1,7 +1,5 @@
-# Импорт связанный со сторонней библиотекой
 from django_filters import rest_framework as filter
 
-# Импорты, зависящие от локального приложения
 from recipes.models import Ingredient, Recipe, Tag
 
 

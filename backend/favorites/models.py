@@ -1,10 +1,6 @@
-# Импорт из стандартной библиотеки Python
 from django.contrib.auth import get_user_model
 from django.db import models
-
-# Импорт, зависящий от локального приложения
 from recipes.models import Recipe
-
 
 User = get_user_model()
 
@@ -29,6 +25,8 @@ class Favorite(models.Model):
                 fields=['user', 'recipe'], name='unique_favorite'
             )
         ]
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные'
 
     def __str__(self):
         return f'{self.user} добавил(а) {self.recipe} в избранное'

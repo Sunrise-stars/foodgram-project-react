@@ -1,11 +1,8 @@
-# Импорты из стандартной библиотеки Python
 from django.urls import include, path
 
-# Импорты связанных сторонних библиотек
 from djoser.views import TokenCreateView
 from rest_framework.routers import DefaultRouter
 
-# Импорты, зависящие от локального приложения или модуля
 from .views import (
     CartRecipeView,
     FavoriteRecipeView,
