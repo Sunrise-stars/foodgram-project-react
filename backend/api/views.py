@@ -1,15 +1,17 @@
-from carts.models import Cart
-from django.db.models import Sum
 from django.http import HttpResponse
+
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from favorites.models import Favorite
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+
+from carts.models import Cart
+from favorites.models import Favorite
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from subscriptions.models import Subscription
 from users.models import User
 
