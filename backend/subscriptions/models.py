@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
-from django.db.models.constraints import UniqueConstraint
 from django.db import models
-
+from django.db.models.constraints import UniqueConstraint
 
 User = get_user_model()
 
