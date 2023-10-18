@@ -19,13 +19,19 @@ from .mixins import AddRemoveFromListMixin
 from .pagination import Pagination
 from .permissions import ReadOnlyAndEditAuthor
 from djoser.views import UserViewSet as DjoserViewSet
-from .serializers import (EditRecipeSerializer, FavoriteAndCartSerializer,
-                          IngredientSerializer, RecipeSerializer,
-                          SubscriptionSerializer, TagSerializer)
+from .serializers import (
+    EditRecipeSerializer,
+    FavoriteAndCartSerializer,
+    IngredientSerializer,
+    RecipeSerializer,
+    SubscriptionSerializer,
+    TagSerializer,
+)
 
 
 class UserViewSet(DjoserViewSet):
     permission_classes = [IsAuthenticated]
+
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
@@ -78,8 +84,12 @@ def download_shopping_cart(request):
     return response
 
 
-class FavoriteRecipeView(AddRemoveFromListMixin, RetrieveDestroyAPIView, ListCreateAPIView):
-    permission_classes = [IsAuthenticated, ]
+class FavoriteRecipeView(
+    AddRemoveFromListMixin, RetrieveDestroyAPIView, ListCreateAPIView
+):
+    permission_classes = [
+        IsAuthenticated,
+    ]
     list_model = Favorite
     error_exists_message = 'Рецепт уже добавлен в избранное.'
     error_not_exists_message = 'Рецепт еще не был добавлен в избранное.'
@@ -88,8 +98,12 @@ class FavoriteRecipeView(AddRemoveFromListMixin, RetrieveDestroyAPIView, ListCre
         return FavoriteAndCartSerializer
 
 
-class CartRecipeView(AddRemoveFromListMixin, RetrieveDestroyAPIView, ListCreateAPIView):
-    permission_classes = [IsAuthenticated, ]
+class CartRecipeView(
+    AddRemoveFromListMixin, RetrieveDestroyAPIView, ListCreateAPIView
+):
+    permission_classes = [
+        IsAuthenticated,
+    ]
     list_model = Cart
     error_exists_message = 'Рецепт уже добавлен в корзину.'
     error_not_exists_message = 'Рецепт еще не был добавлен в корзину.'
@@ -124,7 +138,7 @@ class SubscriptionsView(RetrieveDestroyAPIView, ListCreateAPIView):
             )
 
         if not Subscription.objects.filter(
-                subscriber=user, author=author
+            subscriber=user, author=author
         ).exists():
             subscription = Subscription.objects.create(
                 subscriber=user, author=author
@@ -143,7 +157,7 @@ class SubscriptionsView(RetrieveDestroyAPIView, ListCreateAPIView):
         user = request.user
 
         if Subscription.objects.filter(
-                subscriber=user, author=author
+            subscriber=user, author=author
         ).exists():
             Subscription.objects.filter(
                 subscriber=user, author=author

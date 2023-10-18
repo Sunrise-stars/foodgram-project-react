@@ -60,7 +60,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit')
 
 
-class   EditRecipeIngredientSerializer(serializers.ModelSerializer):
+class EditRecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     amount = serializers.DecimalField(max_digits=5, decimal_places=2)
 
@@ -112,14 +112,31 @@ class EditRecipeSerializer(serializers.ModelSerializer):
 
             if ingredient_amount <= 0:
                 raise serializers.ValidationError(
-                    {"ingredients": [{}, {"amount": ["Количество ингредиента должно быть больше 0!"]}]}
+                    {
+                        "ingredients": [
+                            {},
+                            {
+                                "amount": [
+                                    "Количество ингредиента должно быть больше 0!"
+                                ]
+                            },
+                        ]
+                    }
                 )
 
             if ingredient_id in ingredient_ids:
                 raise serializers.ValidationError(
-                    {"ingredients": [{}, {"amount": [ 'Ингредиенты должны быть уникальными!']}]}
+                    {
+                        "ingredients": [
+                            {},
+                            {
+                                "amount": [
+                                    'Ингредиенты должны быть уникальными!'
+                                ]
+                            },
+                        ]
+                    }
                 )
-
 
             ingredient_ids.add(ingredient_id)
 
@@ -167,6 +184,7 @@ class EditRecipeSerializer(serializers.ModelSerializer):
         return RecipeSerializer(
             instance, context={'request': self.context.get('request')}
         ).data
+
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
