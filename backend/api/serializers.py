@@ -1,6 +1,3 @@
-import json
-from decimal import Decimal
-
 from djoser.serializers import UserCreateSerializer
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
@@ -117,7 +114,8 @@ class EditRecipeSerializer(serializers.ModelSerializer):
                             {},
                             {
                                 "amount": [
-                                    "Количество ингредиента должно быть больше 0!"
+                                    '''Количество ингредиента 
+                                    должно быть больше 0!'''
                                 ]
                             },
                         ]
