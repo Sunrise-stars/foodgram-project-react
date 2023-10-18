@@ -18,10 +18,14 @@ from .filters import IngredientFilter, RecipeFilter
 from .mixins import AddRemoveFromListMixin
 from .pagination import Pagination
 from .permissions import ReadOnlyAndEditAuthor
+from djoser.views import UserViewSet as DjoserViewSet
 from .serializers import (EditRecipeSerializer, FavoriteAndCartSerializer,
                           IngredientSerializer, RecipeSerializer,
                           SubscriptionSerializer, TagSerializer)
 
+
+class UserViewSet(DjoserViewSet):
+    permission_classes = [IsAuthenticated]
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
@@ -83,7 +87,8 @@ class FavoriteRecipeView(AddRemoveFromListMixin, RetrieveDestroyAPIView, ListCre
     def get_serializer_class(self):
         return FavoriteAndCartSerializer
 
-class CartRecipeView(AddRemoveFromListMixin,RetrieveDestroyAPIView, ListCreateAPIView):
+
+class CartRecipeView(AddRemoveFromListMixin, RetrieveDestroyAPIView, ListCreateAPIView):
     permission_classes = [IsAuthenticated, ]
     list_model = Cart
     error_exists_message = 'Рецепт уже добавлен в корзину.'
@@ -91,7 +96,6 @@ class CartRecipeView(AddRemoveFromListMixin,RetrieveDestroyAPIView, ListCreateAP
 
     def get_serializer_class(self):
         return FavoriteAndCartSerializer
-
 
 
 class SubscriptionsView(RetrieveDestroyAPIView, ListCreateAPIView):
@@ -120,7 +124,7 @@ class SubscriptionsView(RetrieveDestroyAPIView, ListCreateAPIView):
             )
 
         if not Subscription.objects.filter(
-            subscriber=user, author=author
+                subscriber=user, author=author
         ).exists():
             subscription = Subscription.objects.create(
                 subscriber=user, author=author
@@ -139,7 +143,7 @@ class SubscriptionsView(RetrieveDestroyAPIView, ListCreateAPIView):
         user = request.user
 
         if Subscription.objects.filter(
-            subscriber=user, author=author
+                subscriber=user, author=author
         ).exists():
             Subscription.objects.filter(
                 subscriber=user, author=author
