@@ -1,3 +1,6 @@
+import json
+from decimal import Decimal
+
 from djoser.serializers import UserCreateSerializer
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
@@ -57,7 +60,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit')
 
 
-class EditRecipeIngredientSerializer(serializers.ModelSerializer):
+class   EditRecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     amount = serializers.DecimalField(max_digits=5, decimal_places=2)
 
@@ -105,10 +108,19 @@ class EditRecipeSerializer(serializers.ModelSerializer):
         ingredient_ids = set()
         for ingredient in ingredients:
             ingredient_id = ingredient['id']
+            ingredient_amount = float(ingredient['amount'])
+
+            if ingredient_amount <= 0:
+                raise serializers.ValidationError(
+                    {"ingredients": [{}, {"amount": ["Количество ингредиента должно быть больше 0!"]}]}
+                )
+
             if ingredient_id in ingredient_ids:
                 raise serializers.ValidationError(
-                    {'ingredients': 'Ингредиенты должны быть уникальными!'}
+                    {"ingredients": [{}, {"amount": [ 'Ингредиенты должны быть уникальными!']}]}
                 )
+
+
             ingredient_ids.add(ingredient_id)
 
         if cooking_time < 1:
