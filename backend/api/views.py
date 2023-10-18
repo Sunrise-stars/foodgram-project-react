@@ -14,7 +14,6 @@ from favorites.models import Favorite
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from subscriptions.models import Subscription
 from users.models import User
-
 from .filters import IngredientFilter, RecipeFilter
 from .mixins import AddRemoveFromListMixin
 from .pagination import Pagination
