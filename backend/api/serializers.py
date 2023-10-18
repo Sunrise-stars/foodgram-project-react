@@ -163,6 +163,10 @@ class EditRecipeSerializer(serializers.ModelSerializer):
 
         RecipeIngredient.objects.bulk_create(ingredients_to_create)
 
+    def to_representation(self, instance):
+        return RecipeSerializer(
+            instance, context={'request': self.context.get('request')}
+        ).data
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
@@ -179,7 +183,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer()
     tags = TagSerializer(many=True)
-    ingredients = EditRecipeIngredientSerializer(many=True)
+    ingredients = serializers.SerializerMethodField()
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField(
         method_name='get_is_favorited'
@@ -191,6 +195,10 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = '__all__'
+
+    def get_ingredients(self, obj):
+        ingredients = RecipeIngredient.objects.filter(recipe=obj)
+        return RecipeIngredientSerializer(ingredients, many=True).data
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
