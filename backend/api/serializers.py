@@ -114,7 +114,7 @@ class EditRecipeSerializer(serializers.ModelSerializer):
                             {},
                             {
                                 "amount": [
-                                    '''Количество ингредиента 
+                                    '''Количество ингредиента
                                     должно быть больше 0!'''
                                 ]
                             },
