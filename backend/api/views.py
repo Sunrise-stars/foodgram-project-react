@@ -59,39 +59,39 @@ def download_shopping_cart(request):
         RecipeIngredient.objects.filter(recipe__cart_by__user=request.user)
         .values('ingredient__name', 'ingredient__measurement_unit')
         .annotate(total_amount=Sum('amount'))
+        .order_by('ingredient__name')
     )
-    for num, i in enumerate(ingredients):
+
+    for i in ingredients:
         ingredient_list += (
             f"\n{i['ingredient__name']} - "
             f"{i['total_amount']} {i['ingredient__measurement_unit']}"
         )
-        if num < len(ingredients) - 1:
-            ingredient_list += ', '
 
-    file = 'shopping_list'
+    file = 'shopping_list.txt'
     response = HttpResponse(ingredient_list, content_type='application/txt')
     response['Content-Disposition'] = f'attachment; filename="{file}.txt"'
     return response
 
 
-class FavoriteRecipeView(
-    AddRemoveFromListMixin, RetrieveDestroyAPIView, ListCreateAPIView
-):
-    permission_classes = [IsAuthenticated]
-    serializer_class = FavoriteAndCartSerializer
+class FavoriteRecipeView(AddRemoveFromListMixin, RetrieveDestroyAPIView, ListCreateAPIView):
+    permission_classes = [IsAuthenticated, ]
     list_model = Favorite
-    list_name = 'избранное'
-    error_message = 'Рецепт уже добавлен в избранное.'
+    error_exists_message = 'Рецепт уже добавлен в избранное.'
+    error_not_exists_message = 'Рецепт еще не был добавлен в избранное.'
 
+    def get_serializer_class(self):
+        return FavoriteAndCartSerializer
 
-class CartRecipeView(
-    AddRemoveFromListMixin, RetrieveDestroyAPIView, ListCreateAPIView
-):
-    permission_classes = [IsAuthenticated]
-    serializer_class = FavoriteAndCartSerializer
+class CartRecipeView(AddRemoveFromListMixin,RetrieveDestroyAPIView, ListCreateAPIView):
+    permission_classes = [IsAuthenticated, ]
     list_model = Cart
-    list_name = 'корзину'
-    error_message = 'Рецепт уже добавлен в корзину.'
+    error_exists_message = 'Рецепт уже добавлен в корзину.'
+    error_not_exists_message = 'Рецепт еще не был добавлен в корзину.'
+
+    def get_serializer_class(self):
+        return FavoriteAndCartSerializer
+
 
 
 class SubscriptionsView(RetrieveDestroyAPIView, ListCreateAPIView):
