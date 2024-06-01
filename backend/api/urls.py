@@ -1,7 +1,6 @@
 from django.urls import include, path
 from djoser.views import TokenCreateView
 from rest_framework.routers import DefaultRouter
-
 from .views import (
     CartRecipeView,
     FavoriteRecipeView,

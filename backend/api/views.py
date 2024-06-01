@@ -1,10 +1,9 @@
 from django.http import HttpResponse
-
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -27,7 +26,9 @@ from .serializers import (
     SubscriptionSerializer,
     TagSerializer,
 )
+import logging
 
+logger = logging.getLogger(__name__)
 
 class UserViewSet(DjoserViewSet):
     permission_classes = [IsAuthenticated]
@@ -63,25 +64,62 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def download_shopping_cart(request):
-    ingredient_list = "Список покупок:"
-    ingredients = (
-        RecipeIngredient.objects.filter(recipe__cart_by__user=request.user)
-        .values('ingredient__name', 'ingredient__measurement_unit')
-        .annotate(total_amount=Sum('amount'))
-        .order_by('ingredient__name')
-    )
+    try:
+        user = request.user
+        if user.is_anonymous:
+            return HttpResponse("Error: User is not authenticated", content_type='text/plain')
 
-    for i in ingredients:
-        ingredient_list += (
-            f"\n{i['ingredient__name']} - "
-            f"{i['total_amount']} {i['ingredient__measurement_unit']}"
+        recipes = (
+            Recipe.objects.filter(cart_by__user=user)
+            .prefetch_related('recipe_ingredients__ingredient')
+            .distinct()
         )
 
-    file = 'shopping_list.txt'
-    response = HttpResponse(ingredient_list, content_type='application/txt')
-    response['Content-Disposition'] = f'attachment; filename="{file}.txt"'
-    return response
+        ingredient_list = "Список покупок:\n"
+        total_cost = 0
+
+        for recipe in recipes:
+            ingredient_list += f"\nРецепт: {recipe.name}\n"
+            recipe_total_cost = 0
+            ingredients = (
+                RecipeIngredient.objects.filter(recipe=recipe)
+                .select_related('ingredient')
+                .values(
+                    'ingredient__name', 
+                    'ingredient__measurement_unit',
+                    'ingredient__price_per_100g',
+                    'amount'
+                )
+            )
+            for i in ingredients:
+                name = i['ingredient__name']
+                measurement_unit = i['ingredient__measurement_unit']
+                total_amount = i['amount']
+                price_per_100g = i.get('ingredient__price_per_100g')
+
+                if price_per_100g is not None:
+                    total_price = (price_per_100g / 100) * total_amount
+                    recipe_total_cost += total_price
+                    ingredient_list += (
+                        f'{name} - {total_amount} {measurement_unit}, '
+                        f'{total_price:.2f} руб. (Цена за 100г - {price_per_100g} руб.)\n'
+                    )
+                else:
+                    ingredient_list += f'{name} - {total_amount} {measurement_unit}, N/A\n'
+
+            total_cost += recipe_total_cost
+            ingredient_list += f'Общая стоимость рецепта: {recipe_total_cost:.2f} руб.\n'
+
+        ingredient_list += f'\nОбщая стоимость всех покупок: {total_cost:.2f} руб.'
+
+        response = HttpResponse(ingredient_list, content_type='text/plain')
+        response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
+        return response
+    except Exception as e:
+        logger.error(f"An error occurred: {str(e)}")
+        return HttpResponse(f"Error: {str(e)}", content_type='text/plain')
 
 
 class FavoriteRecipeView(

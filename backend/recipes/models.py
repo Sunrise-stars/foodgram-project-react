@@ -4,7 +4,6 @@ from django.db.models import UniqueConstraint
 
 User = get_user_model()
 
-
 class Tag(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название')
     color = models.CharField(max_length=7, verbose_name='Цвет')
@@ -18,11 +17,13 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
-
 class Ingredient(models.Model):
     name = models.CharField(max_length=200, verbose_name='Наименование')
     measurement_unit = models.CharField(
         max_length=200, verbose_name='Единица измерения'
+    )
+    price_per_100g = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Цена за 100г'
     )
 
     class Meta:
@@ -32,7 +33,6 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.measurement_unit})"
-
 
 class Recipe(models.Model):
     author = models.ForeignKey(
@@ -61,7 +61,6 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
