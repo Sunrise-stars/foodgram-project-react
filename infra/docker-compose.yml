@@ -30,7 +30,7 @@ services:
       - ./.env
 
   frontend:
-    image: rastiwka/foodgram_frontend:latest
+    build: ../frontend/
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
