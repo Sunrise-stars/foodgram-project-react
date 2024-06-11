@@ -1,3 +1,4 @@
+from djoser.views import UserViewSet as DjoserViewSet
 from django.http import HttpResponse
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
@@ -17,7 +18,6 @@ from .filters import IngredientFilter, RecipeFilter
 from .mixins import AddRemoveFromListMixin
 from .pagination import Pagination
 from .permissions import ReadOnlyAndEditAuthor
-from djoser.views import UserViewSet as DjoserViewSet
 from .serializers import (
     EditRecipeSerializer,
     FavoriteAndCartSerializer,
@@ -57,10 +57,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
 
+    def get_queryset(self):
+        queryset = Recipe.objects.all()
+        search_query = self.request.query_params.get('search', None)
+        if search_query:
+            queryset = queryset.filter(name__icontains=search_query)
+        return queryset
+
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return RecipeSerializer
         return EditRecipeSerializer
+
 
 
 @api_view(['GET'])

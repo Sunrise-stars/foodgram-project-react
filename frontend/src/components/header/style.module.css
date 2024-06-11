@@ -10,3 +10,10 @@
   align-items: center;
   justify-content: space-between;
 }
+
+.searchAndAccount {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+

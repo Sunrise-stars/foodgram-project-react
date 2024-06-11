@@ -1,12 +1,12 @@
 import logo from './logo.svg';
 import './App.css';
-import { Switch, Route, useHistory, Redirect, useLocation } from 'react-router-dom'
-import React, { useState, useEffect } from 'react'
-import { Header, Footer, ProtectedRoute } from './components'
-import api from './api'
-import styles from './styles.module.css'
-import cn from 'classnames'
-import hamburgerImg from './images/hamburger-menu.png'
+import { Switch, Route, useHistory, Redirect, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Header, Footer, ProtectedRoute } from './components';
+import api from './api';
+import styles from './styles.module.css';
+import cn from 'classnames';
+import hamburgerImg from './images/hamburger-menu.png';
 
 import {
   Main,
@@ -19,18 +19,19 @@ import {
   RecipeEdit,
   RecipeCreate,
   User,
-  ChangePassword
-} from './pages'
+  ChangePassword,
+  SearchResults  // Импортируем компонент SearchResults
+} from './pages';
 
-import { AuthContext, UserContext } from './contexts'
+import { AuthContext, UserContext } from './contexts';
 
 function App() {
-  const [ loggedIn, setLoggedIn ] = useState(null)
-  const [ user, setUser ] = useState({})
-  const [ loading, setLoading ] = useState(false)
-  const [ orders, setOrders ] = useState(0)
-  const [ menuToggled, setMenuToggled ] = useState(false)
-  const location = useLocation()
+  const [loggedIn, setLoggedIn] = useState(null);
+  const [user, setUser] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [orders, setOrders] = useState(0);
+  const [menuToggled, setMenuToggled] = useState(false);
+  const location = useLocation();
 
   const registration = ({
     email,
@@ -41,16 +42,16 @@ function App() {
   }) => {
     api.signup({ email, password, username, first_name, last_name })
       .then(res => {
-        history.push('/signin')
+        history.push('/signin');
       })
       .catch(err => {
-        const errors = Object.values(err)
+        const errors = Object.values(err);
         if (errors) {
-          alert(errors.join(', '))
+          alert(errors.join(', '));
         }
-        setLoggedIn(false)
-      })
-  }
+        setLoggedIn(false);
+      });
+  };
 
   const changePassword = ({
     new_password,
@@ -58,15 +59,15 @@ function App() {
   }) => {
     api.changePassword({ new_password, current_password })
       .then(res => {
-        history.push('/signin')
+        history.push('/signin');
       })
       .catch(err => {
-        const errors = Object.values(err)
+        const errors = Object.values(err);
         if (errors) {
-          alert(errors.join(', '))
+          alert(errors.join(', '));
         }
-      })
-  }
+      });
+  };
 
   const authorization = ({
     email, password
@@ -75,57 +76,57 @@ function App() {
       email, password
     }).then(res => {
       if (res.auth_token) {
-        localStorage.setItem('token', res.auth_token)
+        localStorage.setItem('token', res.auth_token);
         api.getUserData()
           .then(res => {
-            setUser(res)
-            setLoggedIn(true)
-            getOrders()
+            setUser(res);
+            setLoggedIn(true);
+            getOrders();
           })
           .catch(err => {
-            setLoggedIn(false)
-            history.push('/signin')
-          })
+            setLoggedIn(false);
+            history.push('/signin');
+          });
       } else {
-        setLoggedIn(false)
+        setLoggedIn(false);
       }
     })
-    .catch(err => {
-      const errors = Object.values(err)
-      if (errors) {
-        alert(errors.join(', '))
-      }
-      setLoggedIn(false)
-    })
-  }
+      .catch(err => {
+        const errors = Object.values(err);
+        if (errors) {
+          alert(errors.join(', '));
+        }
+        setLoggedIn(false);
+      });
+  };
 
   const loadSingleItem = ({ id, callback }) => {
     setTimeout(_ => {
-      callback()
-    }, 3000)
-  }
+      callback();
+    }, 3000);
+  };
 
-  const history = useHistory()
+  const history = useHistory();
   const onSignOut = () => {
     api
       .signout()
       .then(res => {
-        localStorage.removeItem('token')
-        setLoggedIn(false)
+        localStorage.removeItem('token');
+        setLoggedIn(false);
       })
       .catch(err => {
-        const errors = Object.values(err)
+        const errors = Object.values(err);
         if (errors) {
-          alert(errors.join(', '))
+          alert(errors.join(', '));
         }
-      })
-  }
+      });
+  };
 
   useEffect(_ => {
     if (loggedIn) {
-      // history.push('/recipes')
+      // history.push('/recipes');
     }
-  }, [loggedIn])
+  }, [loggedIn]);
 
   const getOrders = () => {
     api
@@ -134,41 +135,41 @@ function App() {
         is_in_shopping_cart: Number(true)
       })
       .then(res => {
-        const { count } = res
-        setOrders(count)
-      })
-  }
+        const { count } = res;
+        setOrders(count);
+      });
+  };
 
   const updateOrders = (add) => {
-    if (!add && orders <= 0) { return }
+    if (!add && orders <= 0) { return; }
     if (add) {
-      setOrders(orders + 1)
+      setOrders(orders + 1);
     } else {
-      setOrders(orders - 1)
+      setOrders(orders - 1);
     }
-  }
+  };
 
   useEffect(_ => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('token');
     if (token) {
       return api.getUserData()
         .then(res => {
-          setUser(res)
-          setLoggedIn(true)
-          getOrders()
+          setUser(res);
+          setLoggedIn(true);
+          getOrders();
         })
         .catch(err => {
-          setLoggedIn(false)
-          history.push('/signin')
-        })
+          setLoggedIn(false);
+          history.push('/signin');
+        });
     }
-    setLoggedIn(false)
-  }, [])
+    setLoggedIn(false);
+  }, []);
 
   if (loggedIn === null) {
-    return <div className={styles.loading}>Loading!!</div>
+    return <div className={styles.loading}>Loading!!</div>;
   }
-  
+
   return <AuthContext.Provider value={loggedIn}>
     <UserContext.Provider value={user}>
       <div className={cn("App", {
@@ -252,6 +253,9 @@ function App() {
             />
           </Route>
 
+          <Route exact path='/search'>  // Добавляем путь для поиска
+            <SearchResults />
+          </Route>
 
           <Route exact path='/signin'>
             <SignIn
@@ -264,13 +268,13 @@ function App() {
             />
           </Route>
           <Route path='/'>
-            {loggedIn ? <Redirect to='/recipes' /> : <Redirect to='/signin'/>}
+            {loggedIn ? <Redirect to='/recipes' /> : <Redirect to='/signin' />}
           </Route>
         </Switch>
         <Footer />
       </div>
     </UserContext.Provider>
-  </AuthContext.Provider>
+  </AuthContext.Provider>;
 }
 
 export default App;

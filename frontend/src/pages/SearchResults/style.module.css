@@ -1,0 +1,36 @@
+/* SearchResults/style.module.css */
+.results {
+    padding: 20px;
+  }
+  
+  .cardGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  
+  /* Добавим стили для Pagination */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+  }
+  
+  .pageItem {
+    margin: 0 5px;
+  }
+  
+  .pageLink {
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #000;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .pageLink:hover {
+    background-color: #f0f0f0;
+    border-color: #bbb;
+  }
+  

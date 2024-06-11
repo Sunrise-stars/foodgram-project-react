@@ -14,6 +14,21 @@ class Api {
     })
   }
 
+  async searchRecipes(query, page = 1, limit = 6) {
+    const response = await fetch(
+      `${this._url}/api/recipes/?search=${query}&page=${page}&limit=${limit}`,
+      {
+        headers: this._headers,
+      }
+    );
+    if (!response.ok) {
+      throw new Error('Ошибка поиска рецептов');
+    }
+    return await response.json();
+  }
+
+
+
   checkFileDownloadResponse (res) {
     return new Promise((resolve, reject) => {
       if (res.status < 400) {

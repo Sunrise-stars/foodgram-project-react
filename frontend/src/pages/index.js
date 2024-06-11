@@ -9,6 +9,7 @@ import Subscriptions from './subscriptions'
 import RecipeCreate from './recipe-create'
 import User from './user'
 import ChangePassword from './change-password'
+import SearchResults from './SearchResults' // Импортируем компонент SearchResults
 
 export {
   Main,
@@ -21,5 +22,6 @@ export {
   Subscriptions,
   RecipeCreate,
   User,
-  ChangePassword
+  ChangePassword,
+  SearchResults // Экспортируем компонент SearchResults
 }
