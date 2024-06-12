@@ -1,3 +1,4 @@
+/* frontend/src/components/purchase/styles.module.css */
 .purchase {
     display: flex;
     align-items: center;
@@ -36,7 +37,8 @@
     display: grid;
     position: relative;
     grid-template-areas: 'image title'
-    'image text';
+    'image text'
+    'image portions';
     justify-content: space-between;
     column-gap: 50px;
 }
@@ -86,3 +88,42 @@
     grid-area: title;
 }
 
+.portionSelector {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  grid-area: portions;
+}
+
+.portionSelector label {
+  margin-right: 10px;
+}
+
+.portionInput {
+  width: 50px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+  -moz-appearance: textfield; /* Для Firefox */
+}
+
+.portionInput::-webkit-outer-spin-button,
+.portionInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0; /* Для Chrome */
+}
+
+.portionButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin: 0 5px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.portionButton:hover {
+  background-color: #0056b3;
+}

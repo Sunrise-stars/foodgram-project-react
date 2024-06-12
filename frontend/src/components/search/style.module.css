@@ -11,18 +11,24 @@
   padding: 0.5rem;
   margin-right: 0.5rem;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px; /* Изменено на более закругленные углы */
+  flex-grow: 1;
+  font-family: Montserrat, Arial, sans-serif; /* Шрифт */
+  font-size: 16px; /* Размер шрифта */
+  width: 250px; /* Немного увеличена длина поля */
 }
 
 .searchButton {
   padding: 0.5rem 1rem;
   border: none;
-  background-color: #007bff;
+  background-color: #4a61dd;
   color: white;
-  border-radius: 4px;
+  border-radius: 6px; /* Изменено на более закругленные углы */
   cursor: pointer;
+  font-family: Montserrat, Arial, sans-serif; /* Шрифт */
+  font-size: 16px; /* Размер шрифта */
 }
 
 .searchButton:hover {
-  background-color: #0056b3;
+  background-color: #4a61dd;
 }
