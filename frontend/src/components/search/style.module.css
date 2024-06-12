@@ -1,15 +1,10 @@
 .searchContainer {
-  position: relative;
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
+  width: auto;
 }
 
 .searchForm {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 100%;
 }
 
 .searchInput {
@@ -17,7 +12,6 @@
   margin-right: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
-  flex-grow: 1;
 }
 
 .searchButton {
@@ -31,29 +25,4 @@
 
 .searchButton:hover {
   background-color: #0056b3;
-}
-
-.suggestionsList {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-top: none;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  z-index: 1000;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.suggestionItem {
-  padding: 0.5rem;
-  cursor: pointer;
-}
-
-.suggestionItem:hover {
-  background-color: #f0f0f0;
 }

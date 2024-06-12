@@ -20,7 +20,6 @@ import {
   RecipeCreate,
   User,
   ChangePassword,
-  SearchResults  // Импортируем компонент SearchResults
 } from './pages';
 
 import { AuthContext, UserContext } from './contexts';
@@ -251,10 +250,6 @@ function App() {
             <Main
               updateOrders={updateOrders}
             />
-          </Route>
-
-          <Route exact path='/search'>  // Добавляем путь для поиска
-            <SearchResults />
           </Route>
 
           <Route exact path='/signin'>

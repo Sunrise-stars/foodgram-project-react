@@ -1,65 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
-import api from '../../api';
 import styles from './style.module.css';
 
-const Search = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
-  const history = useHistory();
+const Search = ({ setSearchQuery }) => {
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
-    if (searchQuery.length > 0) {
-      api.searchRecipes(searchQuery)
-        .then(data => {
-          setSuggestions(data.results);
-        })
-        .catch(err => {
-          console.error(err);
-        });
-    } else {
-      setSuggestions([]);
-    }
-  }, [searchQuery]);
+    setSearchQuery(query);
+  }, [query, setSearchQuery]);
 
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
+  const handleChange = (event) => {
+    setQuery(event.target.value);
   };
 
-  const handleSearchSubmit = (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
-    history.push(`/search?query=${searchQuery}`);
-  };
-
-  const handleSuggestionClick = (recipeId) => {
-    history.push(`/recipes/${recipeId}`);
   };
 
   return (
     <div className={styles.searchContainer}>
-      <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
+      <form onSubmit={handleSubmit} className={styles.searchForm}>
         <input
           type="text"
           placeholder="Поиск рецептов..."
-          value={searchQuery}
-          onChange={handleSearchChange}
+          value={query}
+          onChange={handleChange}
           className={styles.searchInput}
         />
         <button type="submit" className={styles.searchButton}>Поиск</button>
       </form>
-      {suggestions.length > 0 && (
-        <ul className={styles.suggestionsList}>
-          {suggestions.map(suggestion => (
-            <li
-              key={suggestion.id}
-              className={styles.suggestionItem}
-              onClick={() => handleSuggestionClick(suggestion.id)}
-            >
-              {suggestion.name}
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 };

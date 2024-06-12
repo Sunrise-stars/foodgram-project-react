@@ -1,7 +1,7 @@
-import styles from './style.module.css'
-import { LinkComponent, Icons, Button, TagsContainer } from '../index'
-import { useState, useContext } from 'react'
-import { AuthContext } from '../../contexts'
+import styles from './style.module.css';
+import { LinkComponent, Icons, Button, TagsContainer } from '../index';
+import { useContext } from 'react';
+import { AuthContext } from '../../contexts';
 
 const Card = ({
   name = 'Без названия',
@@ -14,14 +14,18 @@ const Card = ({
   author = {},
   handleLike,
   handleAddToCart,
-  updateOrders
+  updateOrders,
+  searchQuery
 }) => {
-  const authContext = useContext(AuthContext)
-  return <div className={styles.card}>
+  const authContext = useContext(AuthContext);
+  const isDimmed = searchQuery && !name.toLowerCase().includes(searchQuery.toLowerCase());
+
+  return (
+    <div className={`${styles.card} ${isDimmed ? styles.dimmed : ''}`}>
       <LinkComponent
         className={styles.card__title}
         href={`/recipes/${id}`}
-        title={<div className={styles.card__image} style={{ backgroundImage: `url(${ image })` }} />}
+        title={<div className={styles.card__image} style={{ backgroundImage: `url(${image})` }} />}
       />
       <div className={styles.card__body}>
         <LinkComponent
@@ -41,33 +45,44 @@ const Card = ({
           />
         </div>
       </div>
-      
       <div className={styles.card__footer}>
-          {authContext && <Button
+        {authContext && (
+          <Button
             className={styles.card__add}
             modifier={is_in_shopping_cart ? 'style_light' : 'style_light-blue'}
-            clickHandler={_ => {
+            clickHandler={() => {
               handleAddToCart({
                 id,
                 toAdd: Number(!is_in_shopping_cart),
                 callback: updateOrders
-              })
+              });
             }}
             disabled={!authContext}
           >
-            {is_in_shopping_cart ? <><Icons.DoneIcon />Рецепт добавлен</> : <><Icons.PlusIcon fill='#4A61DD' /> Добавить в покупки</>}
-          </Button>}
-          
-          {authContext && <Button
+            {is_in_shopping_cart ? (
+              <>
+                <Icons.DoneIcon />Рецепт добавлен
+              </>
+            ) : (
+              <>
+                <Icons.PlusIcon fill='#4A61DD' /> Добавить в покупки
+              </>
+            )}
+          </Button>
+        )}
+        {authContext && (
+          <Button
             modifier='style_none'
-            clickHandler={_ => {
-              handleLike({ id, toLike: Number(!is_favorited) })
+            clickHandler={() => {
+              handleLike({ id, toLike: Number(!is_favorited) });
             }}
           >
             {is_favorited ? <Icons.StarActiveIcon /> : <Icons.StarIcon />}
-          </Button>}
+          </Button>
+        )}
       </div>
-  </div>
-}
+    </div>
+  );
+};
 
-export default Card
+export default Card;
