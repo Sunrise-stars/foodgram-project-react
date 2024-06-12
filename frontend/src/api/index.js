@@ -1,3 +1,5 @@
+// src/api/index.js
+
 class Api {
   constructor (url, headers) {
     this._url = url
@@ -26,8 +28,6 @@ class Api {
     }
     return await response.json();
   }
-
-
 
   checkFileDownloadResponse (res) {
     return new Promise((resolve, reject) => {
@@ -114,7 +114,6 @@ class Api {
       }
     ).then(this.checkResponse)
   }
-
 
   // recipes
 
@@ -400,10 +399,10 @@ class Api {
     ).then(this.checkResponse)
   }
 
-  downloadFile () {
+  downloadFile (queryString) {
     const token = localStorage.getItem('token')
     return fetch(
-      `/api/recipes/download_shopping_cart/`,
+      `/api/recipes/download_shopping_cart?${queryString}`,
       {
         method: 'GET',
         headers: {

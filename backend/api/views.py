@@ -1,3 +1,4 @@
+import json
 from djoser.views import UserViewSet as DjoserViewSet
 from django.http import HttpResponse
 from django.db.models import Sum
@@ -79,6 +80,11 @@ def download_shopping_cart(request):
         if user.is_anonymous:
             return HttpResponse("Error: User is not authenticated", content_type='text/plain')
 
+        # Получаем количество порций из параметров запроса
+        portions = {key: int(value) for key, value in request.GET.items()}
+        print("Portions received:", portions)
+
+        # Получаем все рецепты в корзине пользователя
         recipes = (
             Recipe.objects.filter(cart_by__user=user)
             .prefetch_related('recipe_ingredients__ingredient')
@@ -89,7 +95,9 @@ def download_shopping_cart(request):
         total_cost = 0
 
         for recipe in recipes:
-            ingredient_list += f"\nРецепт: {recipe.name}\n"
+            # Получаем количество порций для текущего рецепта
+            recipe_portions = portions.get(str(recipe.id), 1)  # Default to 1 portion if not specified
+            ingredient_list += f"\nРецепт: {recipe.name} ({recipe_portions} порций)\n"
             recipe_total_cost = 0
             ingredients = (
                 RecipeIngredient.objects.filter(recipe=recipe)
@@ -101,12 +109,15 @@ def download_shopping_cart(request):
                     'amount'
                 )
             )
+
             for i in ingredients:
                 name = i['ingredient__name']
                 measurement_unit = i['ingredient__measurement_unit']
-                total_amount = i['amount']
+                amount_per_portion = i['amount']
+                total_amount = amount_per_portion * recipe_portions  # Умножаем на количество порций
                 price_per_100g = i.get('ingredient__price_per_100g')
 
+                # Если цена за 100г известна, рассчитываем стоимость
                 if price_per_100g is not None:
                     total_price = (price_per_100g / 100) * total_amount
                     recipe_total_cost += total_price
@@ -126,7 +137,7 @@ def download_shopping_cart(request):
         response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
         return response
     except Exception as e:
-        logger.error(f"An error occurred: {str(e)}")
+        print(f"An error occurred: {str(e)}")
         return HttpResponse(f"Error: {str(e)}", content_type='text/plain')
 
 

@@ -1,25 +1,30 @@
 import React, { useState } from 'react';
 import styles from './styles.module.css';
-import cn from 'classnames';
 import { LinkComponent, Icons } from '../index';
 
-const Purchase = ({ image, name, cooking_time, id, handleRemoveFromCart, is_in_shopping_cart, updateOrders }) => {
-  const [portions, setPortions] = useState(1); // Состояние для хранения количества порций
+const Purchase = ({ image, name, cooking_time, id, handleRemoveFromCart, is_in_shopping_cart, updateOrders, setPortions }) => {
+  const [localPortions, setLocalPortions] = useState(1);
 
   if (!is_in_shopping_cart) {
     return null;
   }
 
   const handlePortionChange = (event) => {
-    setPortions(event.target.value);
+    const value = Math.max(1, Math.min(99, parseInt(event.target.value, 10)));
+    setLocalPortions(value);
+    setPortions(id, value);
   };
 
   const increasePortion = () => {
-    setPortions((prevPortions) => Math.min(prevPortions + 1, 99));
+    const newValue = Math.min(localPortions + 1, 99);
+    setLocalPortions(newValue);
+    setPortions(id, newValue);
   };
 
   const decreasePortion = () => {
-    setPortions((prevPortions) => Math.max(prevPortions - 1, 1));
+    const newValue = Math.max(localPortions - 1, 1);
+    setLocalPortions(newValue);
+    setPortions(id, newValue);
   };
 
   return (
@@ -44,7 +49,7 @@ const Purchase = ({ image, name, cooking_time, id, handleRemoveFromCart, is_in_s
             type="number"
             id={`portion-${id}`}
             min="1"
-            value={portions}
+            value={localPortions}
             onChange={handlePortionChange}
             className={styles.portionInput}
           />
@@ -54,7 +59,7 @@ const Purchase = ({ image, name, cooking_time, id, handleRemoveFromCart, is_in_s
       <a
         href="#"
         className={styles.purchaseDelete}
-        onClick={_ => handleRemoveFromCart({ id, toAdd: false, callback: updateOrders })}
+        onClick={() => handleRemoveFromCart({ id, toAdd: false, callback: updateOrders })}
       >
         Удалить
       </a>
